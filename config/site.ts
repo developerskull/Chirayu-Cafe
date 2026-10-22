@@ -28,15 +28,14 @@ export const siteConfig = {
   },
   // Google Maps embed URL — update with exact location pin if needed
   mapsEmbedUrl:
-    "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3748.9!2d73.78!3d19.99!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bdded39059b0e57%3A0x65c40e3bfffedb40!2sMhasrul%2C%20Nashik%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin",
+    "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3748.9!2d73.8220099!3d20.0310782!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjDCsDAx!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin",
   mapsDirectionsUrl:
-    "https://maps.google.com/?q=Kala+Nagar+Mhasrul+Nashik+Near+Reliance+Petrol+Pump",
+    "https://www.google.com/maps/search/Shop+No.+03,+Lotus+Avenue+Apartment,+01,+opposite+Kala+Nagar,+Kalanagar,+Pokar+Colony,+Vaiduwadi,+Dindori+Road,+Nashik,+Maharashtra+422004",
 
   // ----- OPENING HOURS -----
   // Edit these to reflect actual hours
   hours: [
-    { day: "Monday – Friday", time: "9:00 AM – 10:00 PM" },
-    { day: "Saturday – Sunday", time: "8:00 AM – 11:00 PM" },
+    { day: "Monday – Sunday", time: "8:00 AM – 12:00 AM" },
   ],
 
   // ----- SOCIAL LINKS -----

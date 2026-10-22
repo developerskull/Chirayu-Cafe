@@ -1,26 +1,226 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* ===== BRAND COLORS ===== */
+  --color-maroon: #6e2a42;
+  --color-maroon-dark: #4a1a2c;
+  --color-maroon-light: #8c3654;
+  --color-gold: #f5b232;
+  --color-gold-dark: #d49520;
+  --color-orange: #e8891d;
+  --color-cream: #fff6e5;
+  --color-cream-dark: #fde8c0;
+
+  /* ===== FONTS ===== */
+  --font-poppins: var(--font-poppins), "Poppins", sans-serif;
+  --font-playfair: var(--font-playfair), "Playfair Display", serif;
+  --font-devanagari: var(--font-devanagari), "Noto Sans Devanagari", sans-serif;
+
+  /* ===== SHADOWS ===== */
+  --shadow-card: 0 4px 24px rgba(110, 42, 66, 0.12);
+  --shadow-card-hover: 0 8px 40px rgba(110, 42, 66, 0.22);
+  --shadow-gold: 0 4px 20px rgba(245, 178, 50, 0.3);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ===== BASE ===== */
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-cream);
+  font-family: var(--font-poppins);
+  overflow-x: hidden;
 }
+
+/* ===== MARATHI FONT ===== */
+.font-mr {
+  font-family: var(--font-devanagari);
+}
+
+/* ===== CUSTOM SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-cream);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-maroon);
+  border-radius: 3px;
+}
+
+/* ===== DOODLE BACKGROUND PATTERN ===== */
+.doodle-bg {
+  position: relative;
+  overflow: hidden;
+}
+
+.doodle-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' opacity='0.04'%3E%3Ctext x='20' y='60' font-size='40' fill='%236e2a42'%3E☕%3C/text%3E%3Ctext x='120' y='140' font-size='32' fill='%236e2a42'%3E🥪%3C/text%3E%3Ctext x='250' y='80' font-size='36' fill='%236e2a42'%3E🍦%3C/text%3E%3Ctext x='320' y='200' font-size='28' fill='%236e2a42'%3E🍹%3C/text%3E%3Ctext x='60' y='240' font-size='34' fill='%236e2a42'%3E🍟%3C/text%3E%3Ctext x='180' y='300' font-size='30' fill='%236e2a42'%3E🎂%3C/text%3E%3Ctext x='300' y='340' font-size='36' fill='%236e2a42'%3E🍵%3C/text%3E%3Ctext x='80' y='380' font-size='28' fill='%236e2a42'%3E🌶️%3C/text%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 400px 400px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===== GOLD DIVIDER ===== */
+.gold-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.gold-divider::before,
+.gold-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--color-gold), transparent);
+}
+
+/* ===== SECTION TITLE ===== */
+.section-title {
+  font-family: var(--font-playfair);
+  font-weight: 700;
+  color: var(--color-maroon);
+  line-height: 1.2;
+}
+
+/* ===== VEG BADGE ===== */
+.veg-badge {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid #1a7a1a;
+  border-radius: 2px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.veg-badge::after {
+  content: "";
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: #1a7a1a;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ===== SHIMMER ANIMATION ===== */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.shimmer-text {
+  background: linear-gradient(90deg, var(--color-gold), #fff8e1, var(--color-gold));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+}
+
+/* ===== STEAM ANIMATION ===== */
+@keyframes steam {
+  0% { opacity: 0; transform: translateY(0) scaleX(1); }
+  50% { opacity: 0.5; transform: translateY(-20px) scaleX(1.2); }
+  100% { opacity: 0; transform: translateY(-40px) scaleX(0.8); }
+}
+
+.steam-1 { animation: steam 2s ease-in-out infinite; }
+.steam-2 { animation: steam 2s ease-in-out infinite 0.4s; }
+.steam-3 { animation: steam 2s ease-in-out infinite 0.8s; }
+
+/* ===== FLOAT ANIMATION ===== */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-12px) rotate(1deg); }
+  66% { transform: translateY(-6px) rotate(-1deg); }
+}
+
+.float-anim { animation: float 4s ease-in-out infinite; }
+.float-anim-slow { animation: float 6s ease-in-out infinite 1s; }
+
+/* ===== PULSE GLOW ===== */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(245, 178, 50, 0.4); }
+  50% { box-shadow: 0 0 24px rgba(245, 178, 50, 0.8), 0 0 48px rgba(245, 178, 50, 0.3); }
+}
+
+.pulse-gold { animation: pulse-glow 2s ease-in-out infinite; }
+
+/* ===== BUBBLE ANIMATION ===== */
+@keyframes bubble {
+  0% { transform: translateY(0) scale(1); opacity: 0.6; }
+  100% { transform: translateY(-60px) scale(0.5); opacity: 0; }
+}
+
+/* ===== MARQUEE ANIMATION ===== */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* ===== SHINE EFFECT ===== */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent,
+    rgba(255, 255, 255, 0.25),
+    transparent
+  );
+  transform: rotate(30deg) translateX(-100%);
+  transition: transform 0.75s ease;
+}
+.btn-shine:hover::after {
+  transform: rotate(30deg) translateX(100%);
+}
+
+/* ===== SCROLL SNAP ===== */
+.category-tabs {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.category-tabs::-webkit-scrollbar { display: none; }
+
+/* ===== PREFERS REDUCED MOTION ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
