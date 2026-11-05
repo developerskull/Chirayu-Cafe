@@ -445,44 +445,74 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     coffeeMesh.position.y = 0.65;
     cupGroup.add(coffeeMesh);
 
-    // 8. Rising Soft Wispy Steam Tendrils (smooth vertical wisps, not bubbles)
-    const steamCount = 18;
-    const steamGeo = new THREE.CylinderGeometry(0.04, 0.1, 0.55, 8);
-    const steamMat = new THREE.MeshBasicMaterial({
-      color: 0xffeedd,
-      transparent: true,
-      opacity: 0.15,
-      blending: THREE.AdditiveBlending,
-    });
+    // 8. Ethereal Soft Cafe Steam Puffs (Camera-facing Gaussian sprites with organic drift)
+    const createSteamTexture = () => {
+      const c = document.createElement('canvas');
+      c.width = 128;
+      c.height = 128;
+      const ctx = c.getContext('2d');
+      if (!ctx) return null;
 
-    const steamParticles: {
-      mesh: THREE.Mesh;
+      // Multi-layer Gaussian-style soft smoke puff
+      const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 62);
+      grad.addColorStop(0, 'rgba(255, 248, 238, 0.45)');
+      grad.addColorStop(0.25, 'rgba(255, 242, 228, 0.30)');
+      grad.addColorStop(0.55, 'rgba(255, 238, 220, 0.12)');
+      grad.addColorStop(0.85, 'rgba(255, 235, 215, 0.03)');
+      grad.addColorStop(1, 'rgba(255, 235, 215, 0)');
+
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 128, 128);
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    };
+
+    const steamTex = createSteamTexture();
+    const steamCount = 16;
+    const steamGroup = new THREE.Group();
+    cupGroup.add(steamGroup);
+
+    const steamPuffs: {
+      sprite: THREE.Sprite;
+      material: THREE.SpriteMaterial;
       baseX: number;
       baseZ: number;
       speedY: number;
       phase: number;
       wobbleSpeed: number;
+      rotSpeed: number;
     }[] = [];
 
     for (let i = 0; i < steamCount; i++) {
-      const mesh = new THREE.Mesh(steamGeo, steamMat);
+      const sMat = new THREE.SpriteMaterial({
+        map: steamTex,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      });
+      const sprite = new THREE.Sprite(sMat);
+
       const angle = Math.random() * Math.PI * 2;
-      const radius = Math.random() * 0.8;
+      const radius = Math.random() * 0.7;
       const bx = Math.cos(angle) * radius;
       const bz = Math.sin(angle) * radius;
-      const yPos = 0.75 + Math.random() * 2.0;
-      mesh.position.set(bx, yPos, bz);
-      const scale = 0.7 + Math.random() * 1.2;
-      mesh.scale.set(scale, scale * 1.4, scale);
-      cupGroup.add(mesh);
+      const initialY = 0.75 + (i / steamCount) * 2.3;
 
-      steamParticles.push({
-        mesh,
+      sprite.position.set(bx, initialY, bz);
+      steamGroup.add(sprite);
+
+      steamPuffs.push({
+        sprite,
+        material: sMat,
         baseX: bx,
         baseZ: bz,
-        speedY: 0.01 + Math.random() * 0.012,
+        speedY: 0.009 + Math.random() * 0.008,
         phase: Math.random() * Math.PI * 2,
-        wobbleSpeed: 1.2 + Math.random() * 1.5,
+        wobbleSpeed: 1.2 + Math.random() * 1.4,
+        rotSpeed: (Math.random() - 0.5) * 0.02,
       });
     }
 
@@ -595,23 +625,35 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       cupGroup.rotation.x = currentRotationX;
       cupGroup.position.y = -0.12 + Math.sin(elapsed * 1.5) * 0.07 + bounce;
 
-      // Animate steam particles
-      steamParticles.forEach((sp) => {
-        sp.mesh.position.y += sp.speedY;
-        const currentY = sp.mesh.position.y;
-        const progress = (currentY - 0.75) / 2.2;
+      // Animate soft steam puffs with smooth sine-wave opacity
+      steamPuffs.forEach((sp) => {
+        sp.sprite.position.y += sp.speedY;
+        const currentY = sp.sprite.position.y;
+        const progress = Math.max(0, Math.min(1, (currentY - 0.75) / 2.3));
 
-        const wobble = Math.sin(elapsed * sp.wobbleSpeed + sp.phase) * (0.08 + progress * 0.3);
-        sp.mesh.position.x = sp.baseX + wobble;
-        sp.mesh.position.z = sp.baseZ + Math.cos(elapsed * sp.wobbleSpeed + sp.phase) * (0.06 + progress * 0.2);
+        // Sine-wave opacity: perfectly fades in from 0 at surface, peaks in middle, fades away to 0 at top
+        const targetOpacity = Math.sin(progress * Math.PI) * 0.22;
+        sp.material.opacity = targetOpacity;
 
-        const currentScale = 0.7 + progress * 1.5;
-        sp.mesh.scale.set(currentScale, currentScale * 1.4, currentScale);
+        // Gentle organic drift
+        const wobbleX = Math.sin(elapsed * sp.wobbleSpeed + sp.phase) * (0.08 + progress * 0.35);
+        const wobbleZ = Math.cos(elapsed * (sp.wobbleSpeed * 0.8) + sp.phase) * (0.06 + progress * 0.25);
+        sp.sprite.position.x = sp.baseX + wobbleX;
+        sp.sprite.position.z = sp.baseZ + wobbleZ;
 
-        if (currentY > 2.8) {
-          sp.mesh.position.y = 0.75 + Math.random() * 0.2;
-          sp.baseX = (Math.random() - 0.5) * 1.2;
-          sp.baseZ = (Math.random() - 0.5) * 1.2;
+        // Gradual smoke puff expansion
+        const scale = 0.55 + progress * 1.6;
+        sp.sprite.scale.set(scale, scale * 1.3, 1);
+
+        // Slow rotation for natural organic curl
+        sp.material.rotation += sp.rotSpeed;
+
+        if (currentY > 3.05) {
+          sp.sprite.position.y = 0.75 + Math.random() * 0.15;
+          const a = Math.random() * Math.PI * 2;
+          const r = Math.random() * 0.6;
+          sp.baseX = Math.cos(a) * r;
+          sp.baseZ = Math.sin(a) * r;
         }
       });
 
@@ -651,7 +693,6 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       frontLogoGeo.dispose();
       backLogoGeo.dispose();
       coffeeGeo.dispose();
-      steamGeo.dispose();
       ceramicMaterial.dispose();
       goldMaterial.dispose();
       logoMat.dispose();
@@ -660,7 +701,8 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       frontLogoTex?.dispose();
       backLogoTex?.dispose();
       latteTexture.dispose();
-      steamMat.dispose();
+      steamTex?.dispose();
+      steamPuffs.forEach((sp) => sp.material.dispose());
 
       renderer.dispose();
       if (container.contains(renderer.domElement)) {
