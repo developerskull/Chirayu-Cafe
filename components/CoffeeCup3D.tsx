@@ -3,10 +3,27 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
+const CUP_PALETTES = [
+  { id: 'ivory', name: 'Porcelain Ivory', hex: '#faf7f2', label: 'Ivory White' },
+  { id: 'black', name: 'Obsidian Black', hex: '#1c1b1f', label: 'Luxe Black' },
+  { id: 'gold', name: 'Royal Gold', hex: '#d49520', label: 'Royal Gold' },
+  { id: 'maroon', name: 'Cafe Maroon', hex: '#52182b', label: 'Wine Maroon' },
+  { id: 'emerald', name: 'Emerald Jade', hex: '#163b2f', label: 'Jade Green' },
+];
+
 export default function CoffeeCup3D({ className = '' }: { className?: string }) {
   const mountRef = useRef<HTMLDivElement>(null);
+  const ceramicMatRef = useRef<THREE.MeshPhysicalMaterial | null>(null);
+  const [activeColorId, setActiveColorId] = useState('ivory');
   const [isInteractive, setIsInteractive] = useState(false);
   const [celebrateBurst, setCelebrateBurst] = useState(false);
+
+  const handleColorChange = (id: string, hex: string) => {
+    setActiveColorId(id);
+    if (ceramicMatRef.current) {
+      ceramicMatRef.current.color.set(hex);
+    }
+  };
 
   useEffect(() => {
     const container = mountRef.current;
@@ -71,15 +88,16 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     scene.add(cupGroup);
 
     // --- Materials ---
-    // Luxurious Maroon Ceramic
+    // Fine Glazed Porcelain Ceramic (Default: Ivory White)
     const ceramicMaterial = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color('#52182b'),
-      roughness: 0.16,
-      metalness: 0.08,
-      clearcoat: 0.95,
-      clearcoatRoughness: 0.08,
-      reflectivity: 0.85,
+      color: new THREE.Color('#faf7f2'),
+      roughness: 0.12,
+      metalness: 0.05,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.05,
+      reflectivity: 0.9,
     });
+    ceramicMatRef.current = ceramicMaterial;
 
     // Gleaming 24K Gold Accent
     const goldMaterial = new THREE.MeshStandardMaterial({
@@ -161,7 +179,7 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     handleTrim.scale.set(1, 1.25, 1);
     cupGroup.add(handleTrim);
 
-    // 6. High-Resolution "CHIRAYU CAFE" Front Branding
+    // 6. High-Resolution "CHIRAYU CAFE" Front Branding Plaque
     const createFrontLogoTexture = () => {
       const c = document.createElement('canvas');
       c.width = 1024;
@@ -170,6 +188,12 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       if (!cCtx) return null;
 
       cCtx.clearRect(0, 0, 1024, 512);
+
+      // Royal Burgundy Enamel Plaque Background
+      cCtx.fillStyle = '#421422';
+      cCtx.beginPath();
+      cCtx.roundRect(140, 50, 744, 412, 38);
+      cCtx.fill();
 
       // Metallic Gold Gradient
       const goldGrad = cCtx.createLinearGradient(0, 100, 0, 420);
@@ -249,6 +273,12 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
 
       cCtx.clearRect(0, 0, 1024, 512);
 
+      // Royal Burgundy Enamel Plaque Background
+      cCtx.fillStyle = '#421422';
+      cCtx.beginPath();
+      cCtx.roundRect(140, 50, 744, 412, 38);
+      cCtx.fill();
+
       const goldGrad = cCtx.createLinearGradient(0, 100, 0, 420);
       goldGrad.addColorStop(0, '#fff4cc');
       goldGrad.addColorStop(0.3, '#f5b232');
@@ -299,13 +329,13 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       cCtx.fillStyle = '#f5b232';
       cCtx.fillText('◆', 512, 292);
 
-      // Marathi Subtitle
-      cCtx.font = '600 32px "Noto Sans Devanagari", sans-serif';
+      // Tagline Marathi
+      cCtx.font = 'bold 30px "Noto Sans Devanagari", sans-serif';
       cCtx.fillStyle = '#fff6e5';
       cCtx.fillText('खऱ्या अर्थाने सेलिब्रेट करण्याची वेळ', 512, 348);
 
-      // Tag
-      cCtx.font = 'bold 24px "Noto Sans Devanagari", sans-serif';
+      // Subtitle Marathi
+      cCtx.font = '600 24px "Noto Sans Devanagari", sans-serif';
       cCtx.fillStyle = 'rgba(245, 178, 50, 0.95)';
       cCtx.fillText('🌿 १००% शुद्ध शाकाहारी • म्हसरूळ, नाशिक', 512, 402);
 
@@ -367,51 +397,44 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     const latteCanvas = document.createElement('canvas');
     latteCanvas.width = 512;
     latteCanvas.height = 512;
-    const ctx = latteCanvas.getContext('2d');
-    if (ctx) {
-      // Dark rich coffee base
-      const grad = ctx.createRadialGradient(256, 256, 40, 256, 256, 250);
-      grad.addColorStop(0, '#5a2e1d');
-      grad.addColorStop(0.65, '#3b1c0e');
-      grad.addColorStop(1, '#231008');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 512, 512);
+    const lCtx = latteCanvas.getContext('2d');
+    if (lCtx) {
+      // Dark Espresso base
+      const grad = lCtx.createRadialGradient(256, 256, 10, 256, 256, 250);
+      grad.addColorStop(0, '#532f1d');
+      grad.addColorStop(0.7, '#32190d');
+      grad.addColorStop(1, '#1b0d06');
+      lCtx.fillStyle = grad;
+      lCtx.fillRect(0, 0, 512, 512);
 
-      // Cream foam ring
-      ctx.strokeStyle = '#fde8c0';
-      ctx.lineWidth = 14;
-      ctx.beginPath();
-      ctx.arc(256, 256, 210, 0, Math.PI * 2);
-      ctx.stroke();
+      // Golden Crema ring
+      lCtx.strokeStyle = 'rgba(212, 149, 32, 0.45)';
+      lCtx.lineWidth = 14;
+      lCtx.beginPath();
+      lCtx.arc(256, 256, 235, 0, Math.PI * 2);
+      lCtx.stroke();
 
-      // Golden crema swirl
-      ctx.strokeStyle = 'rgba(245, 178, 50, 0.45)';
-      ctx.lineWidth = 8;
-      ctx.beginPath();
-      ctx.arc(256, 256, 170, 0.3, Math.PI * 1.8);
-      ctx.stroke();
+      // Elegant Latte Art Rosette / Heart
+      lCtx.fillStyle = '#fff4e0';
+      lCtx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      lCtx.shadowBlur = 6;
 
-      // Latte Art Heart in center
-      ctx.fillStyle = '#fff6e5';
-      ctx.shadowColor = 'rgba(0,0,0,0.3)';
-      ctx.shadowBlur = 8;
+      // Heart center
+      lCtx.beginPath();
+      lCtx.moveTo(256, 320);
+      lCtx.bezierCurveTo(256, 280, 160, 230, 160, 170);
+      lCtx.bezierCurveTo(160, 120, 210, 120, 256, 170);
+      lCtx.bezierCurveTo(302, 120, 352, 120, 352, 170);
+      lCtx.bezierCurveTo(352, 230, 256, 280, 256, 320);
+      lCtx.fill();
 
-      ctx.save();
-      ctx.translate(256, 240);
-      ctx.beginPath();
-      ctx.moveTo(0, 40);
-      ctx.bezierCurveTo(-70, -30, -70, -100, 0, -50);
-      ctx.bezierCurveTo(70, -100, 70, -30, 0, 40);
-      ctx.fill();
-
-      // Inner heart accent
-      ctx.fillStyle = '#edd2a4';
-      ctx.beginPath();
-      ctx.moveTo(0, 25);
-      ctx.bezierCurveTo(-45, -20, -45, -70, 0, -35);
-      ctx.bezierCurveTo(45, -70, 45, -20, 0, 25);
-      ctx.fill();
-      ctx.restore();
+      // Outer delicate leaf loops
+      for (let s = 0.75; s >= 0.4; s -= 0.18) {
+        lCtx.beginPath();
+        lCtx.arc(256, 240 - (1 - s) * 90, 80 * s, 0, Math.PI * 2);
+        lCtx.fillStyle = 'rgba(255, 244, 224, 0.45)';
+        lCtx.fill();
+      }
     }
 
     const latteTexture = new THREE.CanvasTexture(latteCanvas);
@@ -420,7 +443,7 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     coffeeGeo.rotateX(-Math.PI / 2);
     const coffeeMat = new THREE.MeshStandardMaterial({
       map: latteTexture,
-      roughness: 0.3,
+      roughness: 0.25,
       metalness: 0.1,
     });
     const coffeeMesh = new THREE.Mesh(coffeeGeo, coffeeMat);
@@ -433,28 +456,37 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     const steamMat = new THREE.MeshBasicMaterial({
       color: 0xffffff,
       transparent: true,
-      opacity: 0.22,
+      opacity: 0.28,
     });
 
-    const steamParticles: { mesh: THREE.Mesh; speed: number; angle: number; radius: number; initY: number }[] = [];
-    const steamGroup = new THREE.Group();
-    cupGroup.add(steamGroup);
+    const steamParticles: {
+      mesh: THREE.Mesh;
+      baseX: number;
+      baseZ: number;
+      speedY: number;
+      phase: number;
+      wobbleSpeed: number;
+    }[] = [];
 
     for (let i = 0; i < steamCount; i++) {
-      const p = new THREE.Mesh(steamGeo, steamMat.clone());
-      const initY = 0.7 + Math.random() * 1.8;
+      const mesh = new THREE.Mesh(steamGeo, steamMat);
       const angle = Math.random() * Math.PI * 2;
-      const radius = Math.random() * 0.7;
-      p.position.set(Math.cos(angle) * radius, initY, Math.sin(angle) * radius);
-      const scale = 0.6 + Math.random() * 1.4;
-      p.scale.set(scale, scale * 1.5, scale);
-      steamGroup.add(p);
+      const radius = Math.random() * 0.9;
+      const bx = Math.cos(angle) * radius;
+      const bz = Math.sin(angle) * radius;
+      const yPos = 0.7 + Math.random() * 2.2;
+      mesh.position.set(bx, yPos, bz);
+      const scale = 0.6 + Math.random() * 1.6;
+      mesh.scale.set(scale, scale, scale);
+      cupGroup.add(mesh);
+
       steamParticles.push({
-        mesh: p,
-        speed: 0.012 + Math.random() * 0.015,
-        angle,
-        radius,
-        initY,
+        mesh,
+        baseX: bx,
+        baseZ: bz,
+        speedY: 0.012 + Math.random() * 0.015,
+        phase: Math.random() * Math.PI * 2,
+        wobbleSpeed: 1.5 + Math.random() * 2.0,
       });
     }
 
@@ -462,19 +494,22 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     const starGroup = new THREE.Group();
     scene.add(starGroup);
 
-    const createStarGeo = () => {
-      return new THREE.OctahedronGeometry(0.18, 0);
-    };
-
-    const stars: { mesh: THREE.Mesh; orbitRadius: number; speed: number; orbitY: number; angle: number }[] = [];
-    for (let i = 0; i < 6; i++) {
-      const star = new THREE.Mesh(createStarGeo(), goldMaterial);
-      const angle = (i / 6) * Math.PI * 2;
-      const orbitRadius = 2.4 + (i % 2) * 0.5;
-      const orbitY = -0.3 + (i % 3) * 0.5;
-      star.position.set(Math.cos(angle) * orbitRadius, orbitY, Math.sin(angle) * orbitRadius);
-      starGroup.add(star);
-      stars.push({ mesh: star, orbitRadius, speed: 0.01 + (i % 3) * 0.005, orbitY, angle });
+    const starGeo = new THREE.OctahedronGeometry(0.08, 0);
+    const stars: { mesh: THREE.Mesh; angle: number; radius: number; speed: number; y: number }[] = [];
+    for (let i = 0; i < 14; i++) {
+      const mesh = new THREE.Mesh(starGeo, goldMaterial);
+      const angle = (i / 14) * Math.PI * 2;
+      const radius = 2.8 + Math.random() * 0.6;
+      const y = -0.5 + Math.random() * 2.2;
+      mesh.position.set(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
+      starGroup.add(mesh);
+      stars.push({
+        mesh,
+        angle,
+        radius,
+        speed: 0.008 + (i % 2 === 0 ? 0.004 : -0.004),
+        y,
+      });
     }
 
     // --- Interactive Mouse/Touch Rotation ---
@@ -489,14 +524,14 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
 
     const onPointerDown = (e: PointerEvent) => {
       isDragging = true;
+      setIsInteractive(true);
       previousPointerX = e.clientX;
       previousPointerY = e.clientY;
-      setIsInteractive(true);
+      container.setPointerCapture(e.pointerId);
     };
 
     const onPointerMove = (e: PointerEvent) => {
       if (!isDragging) {
-        // Subtle tilt on hover
         const rect = container.getBoundingClientRect();
         const normX = (e.clientX - rect.left) / rect.width - 0.5;
         const normY = (e.clientY - rect.top) / rect.height - 0.5;
@@ -559,41 +594,44 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       // Bounce decay
       bounce *= 0.92;
 
-      // Position cup with floating bobbing
-      cupGroup.rotation.x = currentRotationX;
+      // Apply rotation to cup
       cupGroup.rotation.y = currentRotationY;
-      cupGroup.position.y = Math.sin(elapsed * 2) * 0.08 + bounce * 0.6;
+      cupGroup.rotation.x = currentRotationX;
+      cupGroup.position.y = Math.sin(elapsed * 1.5) * 0.08 + bounce;
 
-      // Animate Steam
+      // Animate steam particles
       steamParticles.forEach((sp) => {
-        sp.mesh.position.y += sp.speed;
-        const heightRatio = (sp.mesh.position.y - 0.7) / 2.0;
+        sp.mesh.position.y += sp.speedY;
+        const currentY = sp.mesh.position.y;
+        const progress = (currentY - 0.7) / 2.3;
 
-        // Drift in gentle sine wave
-        sp.mesh.position.x += Math.sin(elapsed * 3 + sp.initY) * 0.003;
-        sp.mesh.position.z += Math.cos(elapsed * 2 + sp.initY) * 0.003;
+        // Disperse and fade as steam rises
+        const wobble = Math.sin(elapsed * sp.wobbleSpeed + sp.phase) * (0.1 + progress * 0.35);
+        sp.mesh.position.x = sp.baseX + wobble;
+        sp.mesh.position.z = sp.baseZ + Math.cos(elapsed * sp.wobbleSpeed + sp.phase) * (0.08 + progress * 0.25);
 
-        // Fade out as it rises
-        const mat = sp.mesh.material as THREE.MeshBasicMaterial;
-        mat.opacity = Math.max(0, (1 - heightRatio) * 0.28);
+        const currentScale = 0.6 + progress * 1.8;
+        sp.mesh.scale.set(currentScale, currentScale * 1.2, currentScale);
 
-        // Reset
-        if (sp.mesh.position.y > 2.6) {
-          sp.mesh.position.y = 0.7;
-          sp.mesh.position.x = (Math.random() - 0.5) * 0.8;
-          sp.mesh.position.z = (Math.random() - 0.5) * 0.8;
+        // Reset particle at top
+        if (currentY > 3.0) {
+          sp.mesh.position.y = 0.7 + Math.random() * 0.2;
+          sp.baseX = (Math.random() - 0.5) * 1.4;
+          sp.baseZ = (Math.random() - 0.5) * 1.4;
         }
       });
 
-      // Animate Orbiting Stars
-      stars.forEach((st) => {
-        st.angle += st.speed;
-        st.mesh.position.x = Math.cos(st.angle) * st.orbitRadius;
-        st.mesh.position.z = Math.sin(st.angle) * st.orbitRadius;
-        st.mesh.position.y = st.orbitY + Math.sin(elapsed * 3 + st.angle) * 0.15;
-        st.mesh.rotation.x += 0.03;
-        st.mesh.rotation.y += 0.04;
+      // Orbiting stars animation
+      stars.forEach((s) => {
+        s.angle += s.speed;
+        s.mesh.position.x = Math.cos(s.angle) * s.radius;
+        s.mesh.position.z = Math.sin(s.angle) * s.radius;
+        s.mesh.position.y = s.y + Math.sin(elapsed * 2 + s.angle) * 0.15;
+        s.mesh.rotation.y += 0.03;
+        s.mesh.rotation.x += 0.02;
       });
+
+      starGroup.rotation.y = elapsed * 0.1;
 
       renderer.render(scene, camera);
     };
@@ -609,10 +647,8 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       window.removeEventListener('pointerup', onPointerUp);
       container.removeEventListener('click', onClick);
 
-      // Dispose Three.js resources
-      renderer.dispose();
-      cupGeo.dispose();
       saucerGeo.dispose();
+      cupGeo.dispose();
       cupRimGeo.dispose();
       waistBandGeo.dispose();
       saucerRimGeo.dispose();
@@ -632,6 +668,8 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       latteTexture.dispose();
       steamMat.dispose();
 
+      renderer.dispose();
+      ceramicMatRef.current = null;
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
@@ -651,6 +689,27 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       <div className="flex items-center gap-2 bg-[#f5b232]/20 border border-[#f5b232]/40 text-[#f5b232] px-3.5 py-1 rounded-full text-[11px] font-semibold backdrop-blur-md shadow-sm -mt-2">
         <span className="animate-spin text-xs">✨</span>
         <span>{celebrateBurst ? '🎉 Celebrating!' : isInteractive ? '3D Active • Drag to Spin' : 'Interactive 3D • Tap / Drag Cup'}</span>
+      </div>
+
+      {/* Interactive Cup Color Switcher */}
+      <div className="flex items-center gap-2.5 mt-3 bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15 shadow-md">
+        <span className="text-[11px] text-[#f5b232] font-semibold tracking-wide">Cup Color:</span>
+        <div className="flex items-center gap-2">
+          {CUP_PALETTES.map((palette) => (
+            <button
+              key={palette.id}
+              onClick={() => handleColorChange(palette.id, palette.hex)}
+              className={`w-5 h-5 rounded-full transition-all duration-200 border-2 ${
+                activeColorId === palette.id
+                  ? 'scale-125 border-[#f5b232] shadow-sm shadow-[#f5b232]'
+                  : 'border-white/50 hover:scale-110 opacity-70 hover:opacity-100'
+              }`}
+              style={{ backgroundColor: palette.hex }}
+              title={`Switch cup color to ${palette.label}`}
+              aria-label={`Switch cup color to ${palette.label}`}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
