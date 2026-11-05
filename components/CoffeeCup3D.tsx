@@ -12,10 +12,10 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     const container = mountRef.current;
     if (!container) return;
 
-    // Check WebGL support
+    // Check WebGL support using dummy canvas
     try {
-      const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      const testCanvas = document.createElement('canvas');
+      const gl = testCanvas.getContext('webgl') || testCanvas.getContext('experimental-webgl');
       if (!gl) return;
     } catch {
       return;
@@ -27,8 +27,8 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     // --- Scene, Camera, Renderer ---
     const scene = new THREE.Scene();
 
-    const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 100);
-    camera.position.set(0, 1.8, 6.2);
+    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
+    camera.position.set(0, 1.6, 6.4);
 
     let renderer: THREE.WebGLRenderer;
     try {
@@ -40,24 +40,29 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     } catch {
       return;
     }
+
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.shadowMap.enabled = false;
     container.appendChild(renderer.domElement);
 
     // --- Lighting ---
-    const ambientLight = new THREE.AmbientLight(0xfff6e5, 1.2);
+    const ambientLight = new THREE.AmbientLight(0xfff6e5, 1.4);
     scene.add(ambientLight);
 
-    const mainLight = new THREE.DirectionalLight(0xffeedd, 2.2);
+    const mainLight = new THREE.DirectionalLight(0xffeedd, 2.4);
     mainLight.position.set(4, 6, 5);
     scene.add(mainLight);
 
-    const goldRimLight = new THREE.DirectionalLight(0xf5b232, 2.5);
+    const goldRimLight = new THREE.DirectionalLight(0xf5b232, 2.8);
     goldRimLight.position.set(-5, 3, -3);
     scene.add(goldRimLight);
 
-    const bottomWarmLight = new THREE.PointLight(0xe8891d, 1.5, 8);
+    const frontFillLight = new THREE.DirectionalLight(0xfff8e7, 1.6);
+    frontFillLight.position.set(0, 1, 6);
+    scene.add(frontFillLight);
+
+    const bottomWarmLight = new THREE.PointLight(0xe8891d, 1.8, 8);
     bottomWarmLight.position.set(0, -1, 2);
     scene.add(bottomWarmLight);
 
@@ -68,21 +73,21 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     // --- Materials ---
     // Luxurious Maroon Ceramic
     const ceramicMaterial = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color('#581d31'),
-      roughness: 0.18,
+      color: new THREE.Color('#52182b'),
+      roughness: 0.16,
       metalness: 0.08,
       clearcoat: 0.95,
-      clearcoatRoughness: 0.1,
-      reflectivity: 0.8,
+      clearcoatRoughness: 0.08,
+      reflectivity: 0.85,
     });
 
     // Gleaming 24K Gold Accent
     const goldMaterial = new THREE.MeshStandardMaterial({
       color: new THREE.Color('#f5b232'),
-      metalness: 0.9,
-      roughness: 0.2,
-      emissive: new THREE.Color('#7a520a'),
-      emissiveIntensity: 0.2,
+      metalness: 0.92,
+      roughness: 0.18,
+      emissive: new THREE.Color('#8a5a0c'),
+      emissiveIntensity: 0.25,
     });
 
     // 1. Saucer Plate
@@ -101,7 +106,7 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     cupGroup.add(saucer);
 
     // Gold rim on saucer
-    const saucerRimGeo = new THREE.TorusGeometry(2.38, 0.03, 16, 64);
+    const saucerRimGeo = new THREE.TorusGeometry(2.38, 0.035, 16, 64);
     saucerRimGeo.rotateX(Math.PI / 2);
     const saucerRim = new THREE.Mesh(saucerRimGeo, goldMaterial);
     saucerRim.position.y = -1.2 + 0.36;
@@ -127,17 +132,17 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     cupGroup.add(cup);
 
     // 3. Gold Lip Rim around cup top
-    const cupRimGeo = new THREE.TorusGeometry(1.56, 0.04, 16, 64);
+    const cupRimGeo = new THREE.TorusGeometry(1.56, 0.045, 16, 64);
     cupRimGeo.rotateX(Math.PI / 2);
     const cupRim = new THREE.Mesh(cupRimGeo, goldMaterial);
     cupRim.position.y = 0.8;
     cupGroup.add(cupRim);
 
-    // 4. Gold Band around cup waist
-    const waistBandGeo = new THREE.TorusGeometry(1.4, 0.025, 16, 64);
+    // 4. Gold Band around cup base framing the logo
+    const waistBandGeo = new THREE.TorusGeometry(1.24, 0.025, 16, 64);
     waistBandGeo.rotateX(Math.PI / 2);
     const waistBand = new THREE.Mesh(waistBandGeo, goldMaterial);
-    waistBand.position.y = 0.0;
+    waistBand.position.y = -0.48;
     cupGroup.add(waistBand);
 
     // 5. Cup Handle
@@ -156,7 +161,209 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     handleTrim.scale.set(1, 1.25, 1);
     cupGroup.add(handleTrim);
 
-    // 6. Coffee Liquid with procedural Latte Art
+    // 6. High-Resolution "CHIRAYU CAFE" Front Branding
+    const createFrontLogoTexture = () => {
+      const c = document.createElement('canvas');
+      c.width = 1024;
+      c.height = 512;
+      const cCtx = c.getContext('2d');
+      if (!cCtx) return null;
+
+      cCtx.clearRect(0, 0, 1024, 512);
+
+      // Metallic Gold Gradient
+      const goldGrad = cCtx.createLinearGradient(0, 100, 0, 420);
+      goldGrad.addColorStop(0, '#fff4cc');
+      goldGrad.addColorStop(0.3, '#f5b232');
+      goldGrad.addColorStop(0.7, '#d49520');
+      goldGrad.addColorStop(1, '#a06a09');
+
+      // Outer Ornate Frame
+      cCtx.strokeStyle = goldGrad;
+      cCtx.lineWidth = 4.5;
+      cCtx.beginPath();
+      cCtx.roundRect(140, 50, 744, 412, 38);
+      cCtx.stroke();
+
+      // Inner Frame
+      cCtx.lineWidth = 1.5;
+      cCtx.strokeStyle = 'rgba(245, 178, 50, 0.55)';
+      cCtx.beginPath();
+      cCtx.roundRect(156, 66, 712, 380, 28);
+      cCtx.stroke();
+
+      // Top Stars Crest
+      cCtx.fillStyle = '#f5b232';
+      cCtx.font = '30px serif';
+      cCtx.textAlign = 'center';
+      cCtx.textBaseline = 'middle';
+      cCtx.fillText('★     ★     ★', 512, 115);
+
+      // Main Brand Name: CHIRAYU CAFE
+      cCtx.font = '900 86px "Playfair Display", Georgia, serif';
+      cCtx.fillStyle = goldGrad;
+      cCtx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+      cCtx.shadowBlur = 14;
+      cCtx.shadowOffsetY = 4;
+      cCtx.fillText('CHIRAYU CAFE', 512, 230);
+
+      cCtx.shadowBlur = 0;
+      cCtx.shadowOffsetY = 0;
+
+      // Elegant divider with diamond
+      cCtx.strokeStyle = 'rgba(245, 178, 50, 0.85)';
+      cCtx.lineWidth = 2;
+      cCtx.beginPath();
+      cCtx.moveTo(270, 292);
+      cCtx.lineTo(465, 292);
+      cCtx.moveTo(559, 292);
+      cCtx.lineTo(754, 292);
+      cCtx.stroke();
+
+      cCtx.font = '22px serif';
+      cCtx.fillStyle = '#f5b232';
+      cCtx.fillText('◆', 512, 292);
+
+      // Subtitle
+      cCtx.font = '700 28px "Poppins", sans-serif';
+      cCtx.fillStyle = '#fff6e5';
+      cCtx.fillText('REAL TIME TO CELEBRATE', 512, 348);
+
+      // Est & Location
+      cCtx.font = '600 22px "Poppins", sans-serif';
+      cCtx.fillStyle = 'rgba(245, 178, 50, 0.95)';
+      cCtx.fillText('☕ MHASRUL, NASHIK ☕', 512, 402);
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    };
+
+    // Back Side Branding in Marathi: "चिरायु कॅफे"
+    const createBackLogoTexture = () => {
+      const c = document.createElement('canvas');
+      c.width = 1024;
+      c.height = 512;
+      const cCtx = c.getContext('2d');
+      if (!cCtx) return null;
+
+      cCtx.clearRect(0, 0, 1024, 512);
+
+      const goldGrad = cCtx.createLinearGradient(0, 100, 0, 420);
+      goldGrad.addColorStop(0, '#fff4cc');
+      goldGrad.addColorStop(0.3, '#f5b232');
+      goldGrad.addColorStop(0.7, '#d49520');
+      goldGrad.addColorStop(1, '#a06a09');
+
+      cCtx.strokeStyle = goldGrad;
+      cCtx.lineWidth = 4.5;
+      cCtx.beginPath();
+      cCtx.roundRect(140, 50, 744, 412, 38);
+      cCtx.stroke();
+
+      cCtx.lineWidth = 1.5;
+      cCtx.strokeStyle = 'rgba(245, 178, 50, 0.55)';
+      cCtx.beginPath();
+      cCtx.roundRect(156, 66, 712, 380, 28);
+      cCtx.stroke();
+
+      // Top Icon
+      cCtx.fillStyle = '#f5b232';
+      cCtx.font = '32px sans-serif';
+      cCtx.textAlign = 'center';
+      cCtx.textBaseline = 'middle';
+      cCtx.fillText('✨  ☕  ✨', 512, 115);
+
+      // Brand Name in Marathi: चिरायु कॅफे
+      cCtx.font = 'bold 96px "Noto Sans Devanagari", sans-serif';
+      cCtx.fillStyle = goldGrad;
+      cCtx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+      cCtx.shadowBlur = 14;
+      cCtx.shadowOffsetY = 4;
+      cCtx.fillText('चिरायु कॅफे', 512, 230);
+
+      cCtx.shadowBlur = 0;
+      cCtx.shadowOffsetY = 0;
+
+      // Divider
+      cCtx.strokeStyle = 'rgba(245, 178, 50, 0.85)';
+      cCtx.lineWidth = 2;
+      cCtx.beginPath();
+      cCtx.moveTo(270, 292);
+      cCtx.lineTo(465, 292);
+      cCtx.moveTo(559, 292);
+      cCtx.lineTo(754, 292);
+      cCtx.stroke();
+
+      cCtx.font = '22px serif';
+      cCtx.fillStyle = '#f5b232';
+      cCtx.fillText('◆', 512, 292);
+
+      // Marathi Subtitle
+      cCtx.font = '600 32px "Noto Sans Devanagari", sans-serif';
+      cCtx.fillStyle = '#fff6e5';
+      cCtx.fillText('खऱ्या अर्थाने सेलिब्रेट करण्याची वेळ', 512, 348);
+
+      // Tag
+      cCtx.font = 'bold 24px "Noto Sans Devanagari", sans-serif';
+      cCtx.fillStyle = 'rgba(245, 178, 50, 0.95)';
+      cCtx.fillText('🌿 १००% शुद्ध शाकाहारी • म्हसरूळ, नाशिक', 512, 402);
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    };
+
+    const frontLogoTex = createFrontLogoTexture();
+    const logoMat = new THREE.MeshStandardMaterial({
+      map: frontLogoTex,
+      transparent: true,
+      metalness: 0.85,
+      roughness: 0.22,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+
+    const frontLogoGeo = new THREE.CylinderGeometry(
+      1.52,
+      1.38,
+      0.82,
+      48,
+      1,
+      true,
+      -Math.PI * 0.38,
+      Math.PI * 0.76
+    );
+    const frontLogoMesh = new THREE.Mesh(frontLogoGeo, logoMat);
+    frontLogoMesh.position.y = 0.08;
+    cupGroup.add(frontLogoMesh);
+
+    // Back side logo
+    const backLogoTex = createBackLogoTexture();
+    const backLogoMat = new THREE.MeshStandardMaterial({
+      map: backLogoTex,
+      transparent: true,
+      metalness: 0.85,
+      roughness: 0.22,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+
+    const backLogoGeo = new THREE.CylinderGeometry(
+      1.52,
+      1.38,
+      0.82,
+      48,
+      1,
+      true,
+      Math.PI - Math.PI * 0.38,
+      Math.PI * 0.76
+    );
+    const backLogoMesh = new THREE.Mesh(backLogoGeo, backLogoMat);
+    backLogoMesh.position.y = 0.08;
+    cupGroup.add(backLogoMesh);
+
+    // 7. Coffee Liquid with procedural Latte Art
     const latteCanvas = document.createElement('canvas');
     latteCanvas.width = 512;
     latteCanvas.height = 512;
@@ -208,6 +415,7 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     }
 
     const latteTexture = new THREE.CanvasTexture(latteCanvas);
+    latteTexture.colorSpace = THREE.SRGBColorSpace;
     const coffeeGeo = new THREE.CircleGeometry(1.45, 48);
     coffeeGeo.rotateX(-Math.PI / 2);
     const coffeeMat = new THREE.MeshStandardMaterial({
@@ -219,7 +427,7 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     coffeeMesh.position.y = 0.65;
     cupGroup.add(coffeeMesh);
 
-    // 7. Rising 3D Steam Particles
+    // 8. Rising 3D Steam Particles
     const steamCount = 35;
     const steamGeo = new THREE.SphereGeometry(0.09, 8, 8);
     const steamMat = new THREE.MeshBasicMaterial({
@@ -250,7 +458,7 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       });
     }
 
-    // 8. Orbiting Celebration 3D Stars
+    // 9. Orbiting Celebration 3D Stars
     const starGroup = new THREE.Group();
     scene.add(starGroup);
 
@@ -271,9 +479,9 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
 
     // --- Interactive Mouse/Touch Rotation ---
     let targetRotationX = 0.25;
-    let targetRotationY = -0.5;
+    let targetRotationY = -0.4;
     let currentRotationX = 0.25;
-    let currentRotationY = -0.5;
+    let currentRotationY = -0.4;
     let isDragging = false;
     let previousPointerX = 0;
     let previousPointerY = 0;
@@ -292,7 +500,7 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
         const rect = container.getBoundingClientRect();
         const normX = (e.clientX - rect.left) / rect.width - 0.5;
         const normY = (e.clientY - rect.top) / rect.height - 0.5;
-        targetRotationY = -0.5 + normX * 0.9;
+        targetRotationY = -0.4 + normX * 0.9;
         targetRotationX = 0.25 + normY * 0.5;
         return;
       }
@@ -333,11 +541,11 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
 
     // --- Animation Loop ---
     let animId: number;
-    let clock = new THREE.Clock();
+    const startTime = performance.now();
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
-      const elapsed = clock.getElapsedTime();
+      const elapsed = (performance.now() - startTime) * 0.001;
 
       // Gentle auto-rotation when idle
       if (!isDragging) {
@@ -410,11 +618,17 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       saucerRimGeo.dispose();
       handleShape.dispose();
       handleTrimShape.dispose();
+      frontLogoGeo.dispose();
+      backLogoGeo.dispose();
       coffeeGeo.dispose();
       steamGeo.dispose();
       ceramicMaterial.dispose();
       goldMaterial.dispose();
+      logoMat.dispose();
+      backLogoMat.dispose();
       coffeeMat.dispose();
+      frontLogoTex?.dispose();
+      backLogoTex?.dispose();
       latteTexture.dispose();
       steamMat.dispose();
 
@@ -429,12 +643,12 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       {/* 3D Canvas Mount Point */}
       <div
         ref={mountRef}
-        className="w-[280px] h-[280px] sm:w-[340px] h-[340px] md:w-[400px] md:h-[400px] cursor-grab active:cursor-grabbing touch-none transition-transform hover:scale-105"
+        className="w-[290px] h-[290px] sm:w-[350px] sm:h-[350px] md:w-[410px] md:h-[410px] cursor-grab active:cursor-grabbing touch-none transition-transform hover:scale-105"
         title="Interactive 3D Coffee Cup — Drag to rotate, tap to celebrate!"
       />
 
       {/* Interactive Helper Badge */}
-      <div className="flex items-center gap-2 bg-[#f5b232]/20 border border-[#f5b232]/40 text-[#f5b232] px-3 py-1 rounded-full text-[11px] font-semibold backdrop-blur-md shadow-sm -mt-2">
+      <div className="flex items-center gap-2 bg-[#f5b232]/20 border border-[#f5b232]/40 text-[#f5b232] px-3.5 py-1 rounded-full text-[11px] font-semibold backdrop-blur-md shadow-sm -mt-2">
         <span className="animate-spin text-xs">✨</span>
         <span>{celebrateBurst ? '🎉 Celebrating!' : isInteractive ? '3D Active • Drag to Spin' : 'Interactive 3D • Tap / Drag Cup'}</span>
       </div>

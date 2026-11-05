@@ -172,11 +172,11 @@ export default function CelebrationCanvas3D() {
 
     // --- Animation Loop ---
     let animId: number;
-    let clock = new THREE.Clock();
+    const startTime = performance.now();
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
-      const elapsed = clock.getElapsedTime();
+      const elapsed = (performance.now() - startTime) * 0.001;
 
       // Smooth camera parallax
       mouseX += (targetX - mouseX) * 0.04;
