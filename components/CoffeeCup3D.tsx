@@ -27,9 +27,9 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     // --- Scene, Camera, Renderer ---
     const scene = new THREE.Scene();
 
-    // Perfectly framed camera: wide enough so saucer and steam never clip
-    const camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 100);
-    camera.position.set(0, 1.0, 7.6);
+    // Perfectly framed camera: wide enough so saucer, handle, and steam never clip
+    const camera = new THREE.PerspectiveCamera(36, width / height, 0.1, 100);
+    camera.position.set(0, 1.0, 8.2);
 
     let renderer: THREE.WebGLRenderer;
     try {
@@ -147,21 +147,27 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     waistBand.position.y = -0.48;
     cupGroup.add(waistBand);
 
-    // 5. Cup Handle
-    const handleShape = new THREE.TorusGeometry(0.65, 0.14, 16, 40, Math.PI * 1.25);
-    handleShape.rotateZ(Math.PI * 0.45);
-    const handle = new THREE.Mesh(handleShape, ceramicMaterial);
-    handle.position.set(1.45, -0.15, 0);
-    handle.scale.set(1, 1.25, 1);
+    // 5. Beautiful Sculpted Cup Handle (wide, ergonomic, clearly visible)
+    const handleCurve = new THREE.CubicBezierCurve3(
+      new THREE.Vector3(1.42, 0.52, 0),
+      new THREE.Vector3(2.45, 0.65, 0),
+      new THREE.Vector3(2.48, -0.45, 0),
+      new THREE.Vector3(1.22, -0.52, 0)
+    );
+    const handleGeo = new THREE.TubeGeometry(handleCurve, 32, 0.13, 16, false);
+    const handle = new THREE.Mesh(handleGeo, ceramicMaterial);
     cupGroup.add(handle);
 
-    // Handle gold trim
-    const handleTrimShape = new THREE.TorusGeometry(0.65, 0.03, 12, 40, Math.PI * 1.25);
-    handleTrimShape.rotateZ(Math.PI * 0.45);
-    const handleTrim = new THREE.Mesh(handleTrimShape, goldMaterial);
-    handleTrim.position.set(1.58, -0.15, 0);
-    handleTrim.scale.set(1, 1.25, 1);
-    cupGroup.add(handleTrim);
+    // Elegant 24K Gold Trim running along outer spine of handle
+    const goldSpineCurve = new THREE.CubicBezierCurve3(
+      new THREE.Vector3(1.44, 0.53, 0),
+      new THREE.Vector3(2.50, 0.67, 0),
+      new THREE.Vector3(2.53, -0.46, 0),
+      new THREE.Vector3(1.24, -0.53, 0)
+    );
+    const goldSpineGeo = new THREE.TubeGeometry(goldSpineCurve, 32, 0.035, 12, false);
+    const goldSpine = new THREE.Mesh(goldSpineGeo, goldMaterial);
+    cupGroup.add(goldSpine);
 
     // 6. High-Resolution "CHIRAYU CAFE" Front Branding Plaque
     const createFrontLogoTexture = () => {
@@ -640,8 +646,8 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       cupRimGeo.dispose();
       waistBandGeo.dispose();
       saucerRimGeo.dispose();
-      handleShape.dispose();
-      handleTrimShape.dispose();
+      handleGeo.dispose();
+      goldSpineGeo.dispose();
       frontLogoGeo.dispose();
       backLogoGeo.dispose();
       coffeeGeo.dispose();
