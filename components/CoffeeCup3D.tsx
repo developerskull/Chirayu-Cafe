@@ -3,27 +3,10 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
-const CUP_PALETTES = [
-  { id: 'ivory', name: 'Porcelain Ivory', hex: '#faf7f2', label: 'Ivory White' },
-  { id: 'black', name: 'Obsidian Black', hex: '#1c1b1f', label: 'Luxe Black' },
-  { id: 'gold', name: 'Royal Gold', hex: '#d49520', label: 'Royal Gold' },
-  { id: 'maroon', name: 'Cafe Maroon', hex: '#52182b', label: 'Wine Maroon' },
-  { id: 'emerald', name: 'Emerald Jade', hex: '#163b2f', label: 'Jade Green' },
-];
-
 export default function CoffeeCup3D({ className = '' }: { className?: string }) {
   const mountRef = useRef<HTMLDivElement>(null);
-  const ceramicMatRef = useRef<THREE.MeshPhysicalMaterial | null>(null);
-  const [activeColorId, setActiveColorId] = useState('ivory');
   const [isInteractive, setIsInteractive] = useState(false);
   const [celebrateBurst, setCelebrateBurst] = useState(false);
-
-  const handleColorChange = (id: string, hex: string) => {
-    setActiveColorId(id);
-    if (ceramicMatRef.current) {
-      ceramicMatRef.current.color.set(hex);
-    }
-  };
 
   useEffect(() => {
     const container = mountRef.current;
@@ -38,14 +21,15 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       return;
     }
 
-    const width = container.clientWidth || 320;
-    const height = container.clientHeight || 320;
+    const width = container.clientWidth || 340;
+    const height = container.clientHeight || 300;
 
     // --- Scene, Camera, Renderer ---
     const scene = new THREE.Scene();
 
-    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100);
-    camera.position.set(0, 1.6, 6.4);
+    // Perfectly framed camera: wide enough so saucer and steam never clip
+    const camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 100);
+    camera.position.set(0, 1.0, 7.6);
 
     let renderer: THREE.WebGLRenderer;
     try {
@@ -67,7 +51,7 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     const ambientLight = new THREE.AmbientLight(0xfff6e5, 1.4);
     scene.add(ambientLight);
 
-    const mainLight = new THREE.DirectionalLight(0xffeedd, 2.4);
+    const mainLight = new THREE.DirectionalLight(0xffeedd, 2.5);
     mainLight.position.set(4, 6, 5);
     scene.add(mainLight);
 
@@ -75,7 +59,7 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     goldRimLight.position.set(-5, 3, -3);
     scene.add(goldRimLight);
 
-    const frontFillLight = new THREE.DirectionalLight(0xfff8e7, 1.6);
+    const frontFillLight = new THREE.DirectionalLight(0xfff8e7, 1.8);
     frontFillLight.position.set(0, 1, 6);
     scene.add(frontFillLight);
 
@@ -85,19 +69,19 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
 
     // --- Group for the cup model ---
     const cupGroup = new THREE.Group();
+    cupGroup.position.y = -0.12;
     scene.add(cupGroup);
 
     // --- Materials ---
-    // Fine Glazed Porcelain Ceramic (Default: Ivory White)
+    // Classic Luxurious Chirayu Maroon Ceramic
     const ceramicMaterial = new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color('#faf7f2'),
-      roughness: 0.12,
-      metalness: 0.05,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.05,
-      reflectivity: 0.9,
+      color: new THREE.Color('#581d31'),
+      roughness: 0.16,
+      metalness: 0.08,
+      clearcoat: 0.95,
+      clearcoatRoughness: 0.08,
+      reflectivity: 0.85,
     });
-    ceramicMatRef.current = ceramicMaterial;
 
     // Gleaming 24K Gold Accent
     const goldMaterial = new THREE.MeshStandardMaterial({
@@ -130,7 +114,7 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     saucerRim.position.y = -1.2 + 0.36;
     cupGroup.add(saucerRim);
 
-    // 2. Cup Body (Lathe for authentic ceramic curve)
+    // 2. Cup Body
     const cupPoints: THREE.Vector2[] = [];
     cupPoints.push(new THREE.Vector2(0.9, -1.15));
     cupPoints.push(new THREE.Vector2(1.05, -0.9));
@@ -189,74 +173,74 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
 
       cCtx.clearRect(0, 0, 1024, 512);
 
-      // Royal Burgundy Enamel Plaque Background
-      cCtx.fillStyle = '#421422';
+      // Deep Maroon Enamel Plaque Background
+      cCtx.fillStyle = '#3a101e';
       cCtx.beginPath();
-      cCtx.roundRect(140, 50, 744, 412, 38);
+      cCtx.roundRect(140, 50, 744, 412, 36);
       cCtx.fill();
 
       // Metallic Gold Gradient
-      const goldGrad = cCtx.createLinearGradient(0, 100, 0, 420);
+      const goldGrad = cCtx.createLinearGradient(0, 50, 0, 460);
       goldGrad.addColorStop(0, '#fff4cc');
       goldGrad.addColorStop(0.3, '#f5b232');
       goldGrad.addColorStop(0.7, '#d49520');
-      goldGrad.addColorStop(1, '#a06a09');
+      goldGrad.addColorStop(1, '#8a5a0c');
 
-      // Outer Ornate Frame
+      // Outer gold border
       cCtx.strokeStyle = goldGrad;
-      cCtx.lineWidth = 4.5;
+      cCtx.lineWidth = 6;
       cCtx.beginPath();
-      cCtx.roundRect(140, 50, 744, 412, 38);
+      cCtx.roundRect(140, 50, 744, 412, 36);
       cCtx.stroke();
 
-      // Inner Frame
-      cCtx.lineWidth = 1.5;
-      cCtx.strokeStyle = 'rgba(245, 178, 50, 0.55)';
+      // Inner thin gold pinstripe
+      cCtx.strokeStyle = 'rgba(245, 178, 50, 0.7)';
+      cCtx.lineWidth = 2;
       cCtx.beginPath();
-      cCtx.roundRect(156, 66, 712, 380, 28);
+      cCtx.roundRect(154, 64, 716, 384, 26);
       cCtx.stroke();
 
       // Top Stars Crest
       cCtx.fillStyle = '#f5b232';
-      cCtx.font = '30px serif';
+      cCtx.font = '32px serif';
       cCtx.textAlign = 'center';
       cCtx.textBaseline = 'middle';
       cCtx.fillText('★     ★     ★', 512, 115);
 
-      // Main Brand Name: CHIRAYU CAFE
-      cCtx.font = '900 86px "Playfair Display", Georgia, serif';
+      // Main Brand Name: CHIRAYU CAFE (bold, crisp, large, perfectly centered)
+      cCtx.font = '900 82px "Playfair Display", Georgia, serif';
       cCtx.fillStyle = goldGrad;
-      cCtx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-      cCtx.shadowBlur = 14;
-      cCtx.shadowOffsetY = 4;
-      cCtx.fillText('CHIRAYU CAFE', 512, 230);
+      cCtx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+      cCtx.shadowBlur = 10;
+      cCtx.shadowOffsetY = 3;
+      cCtx.fillText('CHIRAYU CAFE', 512, 215);
 
       cCtx.shadowBlur = 0;
       cCtx.shadowOffsetY = 0;
 
-      // Elegant divider with diamond
+      // Divider Line with Diamond
       cCtx.strokeStyle = 'rgba(245, 178, 50, 0.85)';
       cCtx.lineWidth = 2;
       cCtx.beginPath();
-      cCtx.moveTo(270, 292);
-      cCtx.lineTo(465, 292);
-      cCtx.moveTo(559, 292);
-      cCtx.lineTo(754, 292);
+      cCtx.moveTo(260, 275);
+      cCtx.lineTo(470, 275);
+      cCtx.moveTo(554, 275);
+      cCtx.lineTo(764, 275);
       cCtx.stroke();
 
       cCtx.font = '22px serif';
       cCtx.fillStyle = '#f5b232';
-      cCtx.fillText('◆', 512, 292);
+      cCtx.fillText('◆', 512, 275);
 
-      // Subtitle
-      cCtx.font = '700 28px "Poppins", sans-serif';
-      cCtx.fillStyle = '#fff6e5';
-      cCtx.fillText('REAL TIME TO CELEBRATE', 512, 348);
+      // Tagline
+      cCtx.font = '700 30px "Poppins", sans-serif';
+      cCtx.fillStyle = '#ffffff';
+      cCtx.fillText('REAL TIME TO CELEBRATE', 512, 335);
 
-      // Est & Location
-      cCtx.font = '600 22px "Poppins", sans-serif';
-      cCtx.fillStyle = 'rgba(245, 178, 50, 0.95)';
-      cCtx.fillText('☕ MHASRUL, NASHIK ☕', 512, 402);
+      // Location
+      cCtx.font = '600 24px "Poppins", sans-serif';
+      cCtx.fillStyle = '#f5b232';
+      cCtx.fillText('☕ MHASRUL, NASHIK ☕', 512, 395);
 
       const tex = new THREE.CanvasTexture(c);
       tex.colorSpace = THREE.SRGBColorSpace;
@@ -273,28 +257,30 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
 
       cCtx.clearRect(0, 0, 1024, 512);
 
-      // Royal Burgundy Enamel Plaque Background
-      cCtx.fillStyle = '#421422';
+      // Deep Maroon Enamel Plaque Background
+      cCtx.fillStyle = '#3a101e';
       cCtx.beginPath();
-      cCtx.roundRect(140, 50, 744, 412, 38);
+      cCtx.roundRect(140, 50, 744, 412, 36);
       cCtx.fill();
 
-      const goldGrad = cCtx.createLinearGradient(0, 100, 0, 420);
+      const goldGrad = cCtx.createLinearGradient(0, 50, 0, 460);
       goldGrad.addColorStop(0, '#fff4cc');
       goldGrad.addColorStop(0.3, '#f5b232');
       goldGrad.addColorStop(0.7, '#d49520');
-      goldGrad.addColorStop(1, '#a06a09');
+      goldGrad.addColorStop(1, '#8a5a0c');
 
+      // Outer gold border
       cCtx.strokeStyle = goldGrad;
-      cCtx.lineWidth = 4.5;
+      cCtx.lineWidth = 6;
       cCtx.beginPath();
-      cCtx.roundRect(140, 50, 744, 412, 38);
+      cCtx.roundRect(140, 50, 744, 412, 36);
       cCtx.stroke();
 
-      cCtx.lineWidth = 1.5;
-      cCtx.strokeStyle = 'rgba(245, 178, 50, 0.55)';
+      // Inner thin gold pinstripe
+      cCtx.strokeStyle = 'rgba(245, 178, 50, 0.7)';
+      cCtx.lineWidth = 2;
       cCtx.beginPath();
-      cCtx.roundRect(156, 66, 712, 380, 28);
+      cCtx.roundRect(154, 64, 716, 384, 26);
       cCtx.stroke();
 
       // Top Icon
@@ -304,40 +290,40 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       cCtx.textBaseline = 'middle';
       cCtx.fillText('✨  ☕  ✨', 512, 115);
 
-      // Brand Name in Marathi: चिरायु कॅफे
+      // Marathi Brand Name: चिरायु कॅफे
       cCtx.font = 'bold 96px "Noto Sans Devanagari", sans-serif';
       cCtx.fillStyle = goldGrad;
-      cCtx.shadowColor = 'rgba(0, 0, 0, 0.85)';
-      cCtx.shadowBlur = 14;
-      cCtx.shadowOffsetY = 4;
-      cCtx.fillText('चिरायु कॅफे', 512, 230);
+      cCtx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+      cCtx.shadowBlur = 10;
+      cCtx.shadowOffsetY = 3;
+      cCtx.fillText('चिरायु कॅफे', 512, 215);
 
       cCtx.shadowBlur = 0;
       cCtx.shadowOffsetY = 0;
 
-      // Divider
+      // Divider Line with Diamond
       cCtx.strokeStyle = 'rgba(245, 178, 50, 0.85)';
       cCtx.lineWidth = 2;
       cCtx.beginPath();
-      cCtx.moveTo(270, 292);
-      cCtx.lineTo(465, 292);
-      cCtx.moveTo(559, 292);
-      cCtx.lineTo(754, 292);
+      cCtx.moveTo(260, 275);
+      cCtx.lineTo(470, 275);
+      cCtx.moveTo(554, 275);
+      cCtx.lineTo(764, 275);
       cCtx.stroke();
 
       cCtx.font = '22px serif';
       cCtx.fillStyle = '#f5b232';
-      cCtx.fillText('◆', 512, 292);
+      cCtx.fillText('◆', 512, 275);
 
       // Tagline Marathi
       cCtx.font = 'bold 30px "Noto Sans Devanagari", sans-serif';
-      cCtx.fillStyle = '#fff6e5';
-      cCtx.fillText('खऱ्या अर्थाने सेलिब्रेट करण्याची वेळ', 512, 348);
+      cCtx.fillStyle = '#ffffff';
+      cCtx.fillText('खऱ्या अर्थाने सेलिब्रेट करण्याची वेळ', 512, 335);
 
       // Subtitle Marathi
       cCtx.font = '600 24px "Noto Sans Devanagari", sans-serif';
-      cCtx.fillStyle = 'rgba(245, 178, 50, 0.95)';
-      cCtx.fillText('🌿 १००% शुद्ध शाकाहारी • म्हसरूळ, नाशिक', 512, 402);
+      cCtx.fillStyle = '#f5b232';
+      cCtx.fillText('🌿 १००% शुद्ध शाकाहारी • म्हसरूळ, नाशिक', 512, 395);
 
       const tex = new THREE.CanvasTexture(c);
       tex.colorSpace = THREE.SRGBColorSpace;
@@ -348,24 +334,26 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     const logoMat = new THREE.MeshStandardMaterial({
       map: frontLogoTex,
       transparent: true,
-      metalness: 0.85,
-      roughness: 0.22,
+      metalness: 0.8,
+      roughness: 0.25,
+      depthTest: true,
       depthWrite: false,
       side: THREE.DoubleSide,
     });
 
+    // Badge geometry with deliberate clearance outside the cup surface (+0.08 to +0.10) to completely eliminate clipping
     const frontLogoGeo = new THREE.CylinderGeometry(
-      1.52,
-      1.38,
-      0.82,
+      1.62,
+      1.46,
+      0.70,
       48,
       1,
       true,
-      -Math.PI * 0.38,
-      Math.PI * 0.76
+      -Math.PI * 0.36,
+      Math.PI * 0.72
     );
     const frontLogoMesh = new THREE.Mesh(frontLogoGeo, logoMat);
-    frontLogoMesh.position.y = 0.08;
+    frontLogoMesh.position.y = 0.15;
     cupGroup.add(frontLogoMesh);
 
     // Back side logo
@@ -373,24 +361,25 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     const backLogoMat = new THREE.MeshStandardMaterial({
       map: backLogoTex,
       transparent: true,
-      metalness: 0.85,
-      roughness: 0.22,
+      metalness: 0.8,
+      roughness: 0.25,
+      depthTest: true,
       depthWrite: false,
       side: THREE.DoubleSide,
     });
 
     const backLogoGeo = new THREE.CylinderGeometry(
-      1.52,
-      1.38,
-      0.82,
+      1.62,
+      1.46,
+      0.70,
       48,
       1,
       true,
-      Math.PI - Math.PI * 0.38,
-      Math.PI * 0.76
+      Math.PI - Math.PI * 0.36,
+      Math.PI * 0.72
     );
     const backLogoMesh = new THREE.Mesh(backLogoGeo, backLogoMat);
-    backLogoMesh.position.y = 0.08;
+    backLogoMesh.position.y = 0.15;
     cupGroup.add(backLogoMesh);
 
     // 7. Coffee Liquid with procedural Latte Art
@@ -450,13 +439,14 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     coffeeMesh.position.y = 0.65;
     cupGroup.add(coffeeMesh);
 
-    // 8. Rising 3D Steam Particles
-    const steamCount = 35;
-    const steamGeo = new THREE.SphereGeometry(0.09, 8, 8);
+    // 8. Rising Soft Wispy Steam Tendrils (smooth vertical wisps, not bubbles)
+    const steamCount = 18;
+    const steamGeo = new THREE.CylinderGeometry(0.04, 0.1, 0.55, 8);
     const steamMat = new THREE.MeshBasicMaterial({
-      color: 0xffffff,
+      color: 0xffeedd,
       transparent: true,
-      opacity: 0.28,
+      opacity: 0.15,
+      blending: THREE.AdditiveBlending,
     });
 
     const steamParticles: {
@@ -471,22 +461,22 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     for (let i = 0; i < steamCount; i++) {
       const mesh = new THREE.Mesh(steamGeo, steamMat);
       const angle = Math.random() * Math.PI * 2;
-      const radius = Math.random() * 0.9;
+      const radius = Math.random() * 0.8;
       const bx = Math.cos(angle) * radius;
       const bz = Math.sin(angle) * radius;
-      const yPos = 0.7 + Math.random() * 2.2;
+      const yPos = 0.75 + Math.random() * 2.0;
       mesh.position.set(bx, yPos, bz);
-      const scale = 0.6 + Math.random() * 1.6;
-      mesh.scale.set(scale, scale, scale);
+      const scale = 0.7 + Math.random() * 1.2;
+      mesh.scale.set(scale, scale * 1.4, scale);
       cupGroup.add(mesh);
 
       steamParticles.push({
         mesh,
         baseX: bx,
         baseZ: bz,
-        speedY: 0.012 + Math.random() * 0.015,
+        speedY: 0.01 + Math.random() * 0.012,
         phase: Math.random() * Math.PI * 2,
-        wobbleSpeed: 1.5 + Math.random() * 2.0,
+        wobbleSpeed: 1.2 + Math.random() * 1.5,
       });
     }
 
@@ -499,23 +489,23 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     for (let i = 0; i < 14; i++) {
       const mesh = new THREE.Mesh(starGeo, goldMaterial);
       const angle = (i / 14) * Math.PI * 2;
-      const radius = 2.8 + Math.random() * 0.6;
-      const y = -0.5 + Math.random() * 2.2;
+      const radius = 2.8 + Math.random() * 0.5;
+      const y = -0.5 + Math.random() * 2.0;
       mesh.position.set(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
       starGroup.add(mesh);
       stars.push({
         mesh,
         angle,
         radius,
-        speed: 0.008 + (i % 2 === 0 ? 0.004 : -0.004),
+        speed: 0.008 + (i % 2 === 0 ? 0.003 : -0.003),
         y,
       });
     }
 
     // --- Interactive Mouse/Touch Rotation ---
-    let targetRotationX = 0.25;
+    let targetRotationX = 0.22;
     let targetRotationY = -0.4;
-    let currentRotationX = 0.25;
+    let currentRotationX = 0.22;
     let currentRotationY = -0.4;
     let isDragging = false;
     let previousPointerX = 0;
@@ -536,14 +526,14 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
         const normX = (e.clientX - rect.left) / rect.width - 0.5;
         const normY = (e.clientY - rect.top) / rect.height - 0.5;
         targetRotationY = -0.4 + normX * 0.9;
-        targetRotationX = 0.25 + normY * 0.5;
+        targetRotationX = 0.22 + normY * 0.45;
         return;
       }
       const deltaX = e.clientX - previousPointerX;
       const deltaY = e.clientY - previousPointerY;
       targetRotationY += deltaX * 0.01;
       targetRotationX += deltaY * 0.01;
-      targetRotationX = Math.max(-0.2, Math.min(0.7, targetRotationX));
+      targetRotationX = Math.max(-0.2, Math.min(0.65, targetRotationX));
       previousPointerX = e.clientX;
       previousPointerY = e.clientY;
     };
@@ -597,27 +587,25 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       // Apply rotation to cup
       cupGroup.rotation.y = currentRotationY;
       cupGroup.rotation.x = currentRotationX;
-      cupGroup.position.y = Math.sin(elapsed * 1.5) * 0.08 + bounce;
+      cupGroup.position.y = -0.12 + Math.sin(elapsed * 1.5) * 0.07 + bounce;
 
       // Animate steam particles
       steamParticles.forEach((sp) => {
         sp.mesh.position.y += sp.speedY;
         const currentY = sp.mesh.position.y;
-        const progress = (currentY - 0.7) / 2.3;
+        const progress = (currentY - 0.75) / 2.2;
 
-        // Disperse and fade as steam rises
-        const wobble = Math.sin(elapsed * sp.wobbleSpeed + sp.phase) * (0.1 + progress * 0.35);
+        const wobble = Math.sin(elapsed * sp.wobbleSpeed + sp.phase) * (0.08 + progress * 0.3);
         sp.mesh.position.x = sp.baseX + wobble;
-        sp.mesh.position.z = sp.baseZ + Math.cos(elapsed * sp.wobbleSpeed + sp.phase) * (0.08 + progress * 0.25);
+        sp.mesh.position.z = sp.baseZ + Math.cos(elapsed * sp.wobbleSpeed + sp.phase) * (0.06 + progress * 0.2);
 
-        const currentScale = 0.6 + progress * 1.8;
-        sp.mesh.scale.set(currentScale, currentScale * 1.2, currentScale);
+        const currentScale = 0.7 + progress * 1.5;
+        sp.mesh.scale.set(currentScale, currentScale * 1.4, currentScale);
 
-        // Reset particle at top
-        if (currentY > 3.0) {
-          sp.mesh.position.y = 0.7 + Math.random() * 0.2;
-          sp.baseX = (Math.random() - 0.5) * 1.4;
-          sp.baseZ = (Math.random() - 0.5) * 1.4;
+        if (currentY > 2.8) {
+          sp.mesh.position.y = 0.75 + Math.random() * 0.2;
+          sp.baseX = (Math.random() - 0.5) * 1.2;
+          sp.baseZ = (Math.random() - 0.5) * 1.2;
         }
       });
 
@@ -669,7 +657,6 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       steamMat.dispose();
 
       renderer.dispose();
-      ceramicMatRef.current = null;
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
@@ -681,7 +668,7 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       {/* 3D Canvas Mount Point */}
       <div
         ref={mountRef}
-        className="w-[290px] h-[290px] sm:w-[350px] sm:h-[350px] md:w-[410px] md:h-[410px] cursor-grab active:cursor-grabbing touch-none transition-transform hover:scale-105"
+        className="w-[280px] h-[260px] sm:w-[330px] sm:h-[300px] md:w-[380px] md:h-[340px] cursor-grab active:cursor-grabbing touch-none transition-transform hover:scale-105"
         title="Interactive 3D Coffee Cup — Drag to rotate, tap to celebrate!"
       />
 
@@ -689,27 +676,6 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       <div className="flex items-center gap-2 bg-[#f5b232]/20 border border-[#f5b232]/40 text-[#f5b232] px-3.5 py-1 rounded-full text-[11px] font-semibold backdrop-blur-md shadow-sm -mt-2">
         <span className="animate-spin text-xs">✨</span>
         <span>{celebrateBurst ? '🎉 Celebrating!' : isInteractive ? '3D Active • Drag to Spin' : 'Interactive 3D • Tap / Drag Cup'}</span>
-      </div>
-
-      {/* Interactive Cup Color Switcher */}
-      <div className="flex items-center gap-2.5 mt-3 bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15 shadow-md">
-        <span className="text-[11px] text-[#f5b232] font-semibold tracking-wide">Cup Color:</span>
-        <div className="flex items-center gap-2">
-          {CUP_PALETTES.map((palette) => (
-            <button
-              key={palette.id}
-              onClick={() => handleColorChange(palette.id, palette.hex)}
-              className={`w-5 h-5 rounded-full transition-all duration-200 border-2 ${
-                activeColorId === palette.id
-                  ? 'scale-125 border-[#f5b232] shadow-sm shadow-[#f5b232]'
-                  : 'border-white/50 hover:scale-110 opacity-70 hover:opacity-100'
-              }`}
-              style={{ backgroundColor: palette.hex }}
-              title={`Switch cup color to ${palette.label}`}
-              aria-label={`Switch cup color to ${palette.label}`}
-            />
-          ))}
-        </div>
       </div>
     </div>
   );
