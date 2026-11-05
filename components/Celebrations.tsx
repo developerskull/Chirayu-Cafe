@@ -294,7 +294,7 @@ export default function Celebrations() {
             </h3>
 
             <form onSubmit={handleEnquiry} className="space-y-4" noValidate>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="enquiry-name" className={`text-xs font-semibold text-[#6e2a42] uppercase tracking-wider ${lang === 'mr' ? 'font-mr' : ''}`}>
                     {t('Name *', 'नाव *')}
@@ -344,7 +344,7 @@ export default function Celebrations() {
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="enquiry-date" className={`text-xs font-semibold text-[#6e2a42] uppercase tracking-wider ${lang === 'mr' ? 'font-mr' : ''}`}>
                     {t('Date', 'दिनांक')}

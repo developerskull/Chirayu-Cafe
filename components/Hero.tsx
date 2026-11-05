@@ -25,7 +25,7 @@ export default function Hero() {
     <section
       id="home"
       ref={ref}
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#4a1a2c] via-[#6e2a42] to-[#8c3654]"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#4a1a2c] via-[#6e2a42] to-[#8c3654] pt-20 pb-16 md:pt-28 md:pb-24"
     >
       {/* Animated background circles */}
       <div className="absolute inset-0 overflow-hidden">
@@ -34,8 +34,8 @@ export default function Hero() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#f5b232]/5 rounded-full blur-3xl" />
       </div>
 
-      {/* Floating food items */}
-      <motion.div style={{ y, opacity }} className="absolute inset-0 pointer-events-none">
+      {/* Floating food items (desktop only to prevent obscuring mobile text) */}
+      <motion.div style={{ y, opacity }} className="absolute inset-0 pointer-events-none hidden md:block">
         {floatingItems.map((item, i) => (
           <motion.div
             key={i}

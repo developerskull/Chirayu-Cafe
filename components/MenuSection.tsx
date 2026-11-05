@@ -148,13 +148,14 @@ export default function MenuSection() {
     return result;
   }, [search, quickFilter]);
 
-  // Scroll active tab into view
+  // Scroll active tab into view horizontally inside the tabs container (without scrolling the window)
   useEffect(() => {
     const tabs = tabsRef.current;
     if (!tabs) return;
     const activeTab = tabs.querySelector(`[data-cat="${activeCategory}"]`) as HTMLElement;
     if (activeTab) {
-      activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      const scrollLeft = activeTab.offsetLeft - tabs.clientWidth / 2 + activeTab.clientWidth / 2;
+      tabs.scrollTo({ left: Math.max(0, scrollLeft), behavior: 'smooth' });
     }
   }, [activeCategory]);
 
@@ -203,7 +204,7 @@ export default function MenuSection() {
           </div>
 
           {/* Quick Filter Pills */}
-          <div className="flex items-center justify-center gap-2 overflow-x-auto pb-2 scrollbar-none mb-2">
+          <div className="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto pb-2 scrollbar-none mb-2">
             {[
               { id: 'all', en: 'All Items', mr: 'सर्व पदार्थ', icon: '🍽️' },
               { id: 'bestsellers', en: '🔥 Bestsellers', mr: '🔥 बेस्ट सेलर', icon: '' },
