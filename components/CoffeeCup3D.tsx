@@ -29,7 +29,7 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
 
     // Perfectly framed camera: wide enough so saucer, handle, and steam never clip
     const camera = new THREE.PerspectiveCamera(36, width / height, 0.1, 100);
-    camera.position.set(0, 1.0, 8.2);
+    camera.position.set(0, 1.0, 8.4);
 
     let renderer: THREE.WebGLRenderer;
     try {
@@ -147,25 +147,25 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
     waistBand.position.y = -0.48;
     cupGroup.add(waistBand);
 
-    // 5. Beautiful Sculpted Cup Handle (wide, ergonomic, clearly visible)
+    // 5. Classic Prominent Sculpted Cup Handle (wide, ergonomic ear-loop)
     const handleCurve = new THREE.CubicBezierCurve3(
-      new THREE.Vector3(1.42, 0.52, 0),
-      new THREE.Vector3(2.45, 0.65, 0),
-      new THREE.Vector3(2.48, -0.45, 0),
-      new THREE.Vector3(1.22, -0.52, 0)
+      new THREE.Vector3(1.45, 0.45, 0),
+      new THREE.Vector3(3.0, 0.60, 0),
+      new THREE.Vector3(3.05, -0.45, 0),
+      new THREE.Vector3(1.22, -0.45, 0)
     );
-    const handleGeo = new THREE.TubeGeometry(handleCurve, 32, 0.13, 16, false);
+    const handleGeo = new THREE.TubeGeometry(handleCurve, 36, 0.16, 16, false);
     const handle = new THREE.Mesh(handleGeo, ceramicMaterial);
     cupGroup.add(handle);
 
-    // Elegant 24K Gold Trim running along outer spine of handle
+    // Elegant 24K Gold Trim running along the outer spine of the handle
     const goldSpineCurve = new THREE.CubicBezierCurve3(
-      new THREE.Vector3(1.44, 0.53, 0),
-      new THREE.Vector3(2.50, 0.67, 0),
-      new THREE.Vector3(2.53, -0.46, 0),
-      new THREE.Vector3(1.24, -0.53, 0)
+      new THREE.Vector3(1.47, 0.46, 0),
+      new THREE.Vector3(3.04, 0.61, 0),
+      new THREE.Vector3(3.09, -0.46, 0),
+      new THREE.Vector3(1.24, -0.46, 0)
     );
-    const goldSpineGeo = new THREE.TubeGeometry(goldSpineCurve, 32, 0.035, 12, false);
+    const goldSpineGeo = new THREE.TubeGeometry(goldSpineCurve, 36, 0.045, 12, false);
     const goldSpine = new THREE.Mesh(goldSpineGeo, goldMaterial);
     cupGroup.add(goldSpine);
 
@@ -674,7 +674,7 @@ export default function CoffeeCup3D({ className = '' }: { className?: string }) 
       {/* 3D Canvas Mount Point */}
       <div
         ref={mountRef}
-        className="w-[280px] h-[260px] sm:w-[330px] sm:h-[300px] md:w-[380px] md:h-[340px] cursor-grab active:cursor-grabbing touch-none transition-transform hover:scale-105"
+        className="w-[300px] h-[270px] sm:w-[350px] sm:h-[310px] md:w-[400px] md:h-[350px] cursor-grab active:cursor-grabbing touch-none transition-transform hover:scale-105"
         title="Interactive 3D Coffee Cup — Drag to rotate, tap to celebrate!"
       />
 
