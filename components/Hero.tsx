@@ -4,6 +4,8 @@ import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useLang } from '@/context/LangContext';
 import { siteConfig } from '@/config/site';
+import CoffeeCup3D from './CoffeeCup3D';
+import CelebrationCanvas3D from './CelebrationCanvas3D';
 
 const floatingItems = [
   { emoji: '☕', size: 'text-6xl', top: '15%', left: '8%', delay: 0, rotate: -15 },
@@ -33,6 +35,9 @@ export default function Hero() {
         <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[#e8891d]/10 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#f5b232]/5 rounded-full blur-3xl" />
       </div>
+
+      {/* Three.js 3D Ambient Celebration Particle Canvas */}
+      <CelebrationCanvas3D />
 
       {/* Floating food items (desktop only to prevent obscuring mobile text) */}
       <motion.div style={{ y, opacity }} className="absolute inset-0 pointer-events-none hidden md:block">
@@ -248,16 +253,9 @@ export default function Hero() {
           ))}
         </motion.div>
 
-        {/* Steam cup decoration */}
+        {/* Three.js Interactive 3D Coffee Cup */}
         <div className="mt-4 flex justify-center">
-          <div className="relative text-5xl select-none">
-            ☕
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 flex gap-1">
-              <div className="w-1 h-5 bg-white/30 rounded-full steam-1" style={{ borderRadius: '100%' }} />
-              <div className="w-1 h-7 bg-white/30 rounded-full steam-2" style={{ borderRadius: '100%' }} />
-              <div className="w-1 h-4 bg-white/30 rounded-full steam-3" style={{ borderRadius: '100%' }} />
-            </div>
-          </div>
+          <CoffeeCup3D />
         </div>
       </motion.div>
 
